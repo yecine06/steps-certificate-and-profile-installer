@@ -72,10 +72,15 @@ function download_file {
   set -e
 }
 
-echo "Downloading certificate"
 certificate_path="${temp_dir}/Certificate.p12"
-download_file "${certificate_path}" "${certificate_url}"
 
+if [ -z "${certificate_local_path}" ] ; then
+  echo "Using local certificate"
+  cp "${certificate_local_path}" "${certificate_path}"
+else  
+  echo "Downloading certificate"
+  download_file "${certificate_path}" "${certificate_url}"
+fi
 
 #
 # Install certificate
@@ -101,17 +106,29 @@ echo
 #
 # Install provisioning profiles
 #  NOTE: the URL can be a pipe (|) separated list of Provisioning Profile URLs
-IFS='|' read -a profile_urls <<< "${provisioning_profile_url}"
-profile_count="${#profile_urls[@]}"
+
+if [ -z "${provisioning_profile_local_path}" ] ; then
+  IFS='|' read -a profiles <<< "${provisioning_profile_local_path}"
+else
+  IFS='|' read -a profiles <<< "${provisioning_profile_url}"
+fi
+
+
+profile_count="${#profiles[@]}"
 echo " (i) Provided Provisioning Profile count: ${profile_count}"
-for idx in "${!profile_urls[@]}"
+for idx in "${!profiles[@]}"
 do
-  profile_url="${profile_urls[idx]}"
-  echo "Downloading provisioning profile: ${idx+1}/${profile_count}"
+  profile_url="${profiles[idx]}"
 
   tmp_path="${temp_dir}/profile-${idx}.mobileprovision"
-  download_file "${tmp_path}" "${profile_url}"
-
+  if [ -z "${provisioning_profile_local_path}" ] ; then
+    echo "Downloading provisioning profile: ${idx+1}/${profile_count}"
+    download_file "${tmp_path}" "${profile_url}"
+  else
+    echo "Copy provisioning profile: ${idx+1}/${profile_count}"
+    cp "${profile_url}" "${tmp_path}"
+  fi
+  
   echo "Installing provisioning profile"
   profile_uuid=$(/usr/libexec/PlistBuddy -c "Print UUID" /dev/stdin <<< $(/usr/bin/security cms -D -i "${tmp_path}"))
   echo "=> Installed Profile UUID: ${profile_uuid}"

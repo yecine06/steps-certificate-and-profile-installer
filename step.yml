@@ -30,6 +30,15 @@ inputs:
       is_required: true
       is_expand: true
       is_dont_change_value: false
+  - certificate_local_path: $BITRISE_CERTIFICATE_PATH
+    opts:
+      title: "Certificate Local Path"
+      description: |
+        Path of the certificate to use
+      summary: ""
+      is_required: false
+      is_expand: true
+      is_dont_change_value: false
   - certificate_passphrase: $BITRISE_CERTIFICATE_PASSPHRASE
     opts:
       title: "Certificate passphrase"
@@ -48,6 +57,15 @@ inputs:
       is_required: true
       is_expand: true
       is_dont_change_value: false
+  - provisioning_profile_local_path: $BITRISE_PROVISION_PATH
+    opts:
+      title: "Provisioning profile URL"
+      description: |
+        Path of the provisioning profile to use
+      summary: ""
+      is_required: false
+      is_expand: true
+      is_dont_change_value: false      
   - keychain_path: $HOME/Library/Keychains/login.keychain
     opts:
       title: Keychain Path
